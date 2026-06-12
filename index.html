@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Anamnesis"/>
+<title>Anamnesis Viva · Consultorio Karen Pérez Pareja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --rose:#A85D72; --rose-dark:#8A4A5D; --rose-soft:#F6E9ED; --rose-line:#EAD3DA;
+  --ink:#2E2228; --ink-soft:#6B5A61; --ink-faint:#A3919A;
+  --paper:#FBF8F6; --card:#FFFFFF; --ok:#3E7D5A; --warn:#A8762E; --err:#B0413E;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--paper);color:var(--ink);min-height:100dvh;font-size:15px}
+.shell{max-width:680px;margin:0 auto;padding:0 16px calc(96px + env(safe-area-inset-bottom))}
+
+/* ── Header ── */
+.topbar{padding:20px 0 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--rose-line)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:42px;height:42px;border-radius:50%;background:var(--rose-soft);border:1px solid var(--rose-line);display:flex;align-items:center;justify-content:center;color:var(--rose);font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic}
+.brand h1{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--ink);line-height:1.1}
+.brand p{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-top:2px}
+.drive-pill{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-soft);background:var(--card);border:1px solid var(--rose-line);border-radius:99px;padding:6px 12px}
+.drive-pill .dot{width:7px;height:7px;border-radius:50%;background:#C9B0B8}
+.drive-pill.on .dot{background:var(--ok)}
+
+/* ── Steps nav ── */
+.steps{display:flex;gap:8px;margin:18px 0 14px}
+.step{flex:1;padding:11px 8px;border-radius:12px;border:1px solid var(--rose-line);background:var(--card);color:var(--ink-soft);font-size:13.5px;font-weight:500;text-align:center;cursor:pointer;transition:.18s}
+.step.active{background:var(--rose);border-color:var(--rose);color:#fff}
+.step .n{display:inline-flex;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.06);font-size:11px;align-items:center;justify-content:center;margin-right:6px;font-weight:600}
+.step.active .n{background:rgba(255,255,255,.25)}
+.step.done .n{background:var(--ok);color:#fff}
+
+/* ── Cards ── */
+.card{background:var(--card);border:1px solid var(--rose-line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(168,93,114,.05)}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);font-weight:600}
+.chevron{border:none;background:none;color:var(--ink-faint);cursor:pointer;font-size:18px;transition:transform .2s}
+.collapsed .chevron{transform:rotate(-90deg)}
+.collapsed .card-body{display:none}
+
+/* ── Form ── */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid .full{grid-column:1/-1}
+.field label{display:block;font-size:11px;color:var(--ink-faint);font-weight:500;margin-bottom:4px;letter-spacing:.02em}
+.field input{width:100%;border:1px solid var(--rose-line);border-radius:10px;padding:10px 12px;font-size:14.5px;font-family:inherit;color:var(--ink);background:#FDFBFC;outline:none;transition:border-color .15s}
+.field input:focus{border-color:var(--rose)}
+
+/* ── Recorder ── */
+.recorder{text-align:center;padding:10px 0 4px}
+.rec-btn{width:88px;height:88px;border-radius:50%;border:none;background:var(--rose);color:#fff;cursor:pointer;position:relative;transition:transform .12s,background .2s;box-shadow:0 6px 24px rgba(168,93,114,.28)}
+.rec-btn:active{transform:scale(.93)}
+.rec-btn.live{background:var(--err);box-shadow:0 6px 24px rgba(176,65,62,.32)}
+.rec-btn.live::before{content:'';position:absolute;inset:-9px;border-radius:50%;border:2px solid rgba(176,65,62,.35);animation:ring 1.6s ease-out infinite}
+@keyframes ring{0%{transform:scale(.85);opacity:1}100%{transform:scale(1.18);opacity:0}}
+.rec-btn svg{width:34px;height:34px}
+.rec-meta{margin-top:10px;min-height:22px;font-size:13px;color:var(--ink-soft)}
+.rec-meta .timer{font-variant-numeric:tabular-nums;font-weight:600;color:var(--err)}
+textarea{width:100%;border:1px solid var(--rose-line);border-radius:12px;padding:13px;font-size:14.5px;line-height:1.75;font-family:inherit;color:var(--ink);background:#FDFBFC;outline:none;resize:vertical;transition:border-color .15s}
+textarea:focus{border-color:var(--rose)}
+
+/* ── Buttons ── */
+.btn{width:100%;padding:15px;border-radius:13px;border:none;font-size:15.5px;font-weight:600;font-family:inherit;cursor:pointer;transition:.18s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-rose{background:var(--rose);color:#fff}
+.btn-rose:hover{background:var(--rose-dark)}
+.btn-rose:disabled{background:#D4B4BE;cursor:default}
+.btn-ghost{background:var(--card);color:var(--rose);border:1px solid var(--rose-line)}
+.btn-ok{background:var(--ok);color:#fff}
+.btn-row{display:flex;gap:10px}
+.btn-row .btn{flex:1}
+
+/* ── Secciones documento ── */
+.sec{margin-bottom:10px}
+.sec-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.sec-title{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--rose);font-weight:600}
+.sec-badge{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--rose-soft);color:var(--rose);font-weight:600}
+.sec-badge.empty{background:#F1EDEA;color:var(--ink-faint)}
+.empty-state{border:1.5px dashed var(--rose-line);border-radius:16px;padding:40px 24px;text-align:center;color:var(--ink-faint);font-size:14px;line-height:1.7}
+.empty-state strong{color:var(--ink-soft)}
+
+/* ── Action bar ── */
+.actionbar{position:fixed;left:0;right:0;bottom:0;background:rgba(251,248,246,.92);backdrop-filter:blur(12px);border-top:1px solid var(--rose-line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:none;z-index:50}
+.actionbar.show{display:block}
+.actionbar-inner{max-width:680px;margin:0 auto;display:flex;gap:10px}
+.actionbar .btn{flex:1;padding:13px}
+
+/* ── Toast ── */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--ink);color:#fff;font-size:13.5px;padding:12px 20px;border-radius:99px;z-index:99;transition:transform .3s cubic-bezier(.2,.9,.3,1.2);max-width:90vw;text-align:center;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--ok)}.toast.err{background:var(--err)}
+.toast a{color:#fff;text-decoration:underline;font-weight:600}
+
+/* ── Misc ── */
+.spinner{width:17px;height:17px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.alert{background:#FBF3E4;border:1px solid #EBD9B4;border-radius:12px;padding:13px 15px;font-size:13px;color:#7A5E28;line-height:1.6;margin-bottom:14px}
+.footer{text-align:center;padding:26px 0 10px}
+.footer button{background:none;border:none;color:var(--ink-faint);font-size:12px;font-family:inherit;text-decoration:underline;cursor:pointer}
+.footer p{color:#C5B6BC;font-size:11px;margin-top:10px;line-height:1.6}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">K</div>
+      <div>
+        <h1>Anamnesis Viva</h1>
+        <p>Neuropsicóloga Karen Pérez Pareja</p>
+      </div>
+    </div>
+    <div class="drive-pill" id="drivePill"><span class="dot"></span><span id="drivePillTxt">Drive</span></div>
+  </header>
+
+  <nav class="steps">
+    <button class="step active" id="stepA" onclick="go('captura')"><span class="n">1</span>Entrevista</button>
+    <button class="step" id="stepB" onclick="go('documento')"><span class="n">2</span>Documento</button>
+  </nav>
+
+  <!-- ════ VISTA 1: CAPTURA ════ -->
+  <section id="vCaptura">
+
+    <div class="card" id="cardPaciente">
+      <div class="card-head" onclick="togglePaciente()" style="cursor:pointer">
+        <span class="card-title">Datos del paciente</span>
+        <button class="chevron">▾</button>
+      </div>
+      <div class="card-body">
+        <div class="grid">
+          <div class="field full"><label>Nombre completo</label><input id="pNombre" autocomplete="off" placeholder="Nombre del paciente"/></div>
+          <div class="field"><label>N° documento</label><input id="pDoc" inputmode="numeric" placeholder="0000000000"/></div>
+          <div class="field"><label>Fecha de nacimiento</label><input id="pNac" placeholder="DD/MM/AAAA" oninput="calcEdad()"/></div>
+          <div class="field"><label>Edad</label><input id="pEdad" placeholder="—"/></div>
+          <div class="field"><label>Escolaridad</label><input id="pEsc" placeholder="Grado / nivel"/></div>
+          <div class="field"><label>Contacto</label><input id="pTel" inputmode="tel" placeholder="Teléfono"/></div>
+          <div class="field"><label>Fecha de evaluación</label><input id="pFecha"/></div>
+          <div class="field full"><label>Acompañante(s)</label><input id="pAcomp" placeholder="Padres, acudiente..."/></div>
+          <div class="field full"><label>Correo electrónico</label><input id="pCorreo" inputmode="email" placeholder="correo@ejemplo.com"/></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="recorder">
+        <button class="rec-btn" id="recBtn" onclick="toggleRec()" aria-label="Grabar entrevista">
+          <svg id="icMic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="21"/></svg>
+          <svg id="icStop" class="hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>
+        </button>
+        <div class="rec-meta" id="recMeta">Toca para iniciar la grabación de la entrevista</div>
+      </div>
+      <div class="alert hide" id="micAlert">El micrófono no está disponible. En iPhone usa <strong>Safari</strong> y acepta el permiso, o escribe las notas directamente abajo.</div>
+      <div class="field">
+        <label style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--rose);font-weight:600">Transcripción de la entrevista</label>
+        <textarea id="trans" rows="9" placeholder="Aquí aparece lo que se habla durante la sesión. También puedes escribir o pegar notas directamente." style="margin-top:6px"></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-rose" id="btnIA" onclick="estructurar()">✦&nbsp; Estructurar historia clínica con IA</button>
+  </section>
+
+  <!-- ════ VISTA 2: DOCUMENTO ════ -->
+  <section id="vDocumento" class="hide">
+    <div class="empty-state" id="docEmpty">
+      El documento está vacío.<br/>Realiza la entrevista en el paso 1 y presiona<br/><strong>«Estructurar historia clínica con IA»</strong>.
+    </div>
+    <div id="docSecs"></div>
+  </section>
+
+  <div class="footer">
+    <button onclick="nuevaSesion()">Nueva sesión (borrar todo)</button>
+    <p>Borrador asistido por IA · El documento final es revisado y validado por la profesional.<br/>Los datos se conservan en este dispositivo hasta iniciar una nueva sesión.</p>
+  </div>
+</div>
+
+<!-- Action bar -->
+<div class="actionbar" id="abar">
+  <div class="actionbar-inner">
+    <button class="btn btn-ghost" onclick="copiarDoc()" id="btnCopiar">Copiar</button>
+    <button class="btn btn-rose" onclick="guardarDrive()" id="btnDrive">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+      Guardar en Drive
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════ CONFIG ════════ */
+const SECCIONES=[
+ {id:"motivoConsulta",t:"Motivo de la consulta"},
+ {id:"neurodesarrollo",t:"Neurodesarrollo"},
+ {id:"desarrolloMotor",t:"Desarrollo motor"},
+ {id:"desarrolloLenguaje",t:"Desarrollo del lenguaje"},
+ {id:"esfinteresSensorial",t:"Control de esfínteres y sensorialidad"},
+ {id:"antecedentesClinicos",t:"Antecedentes clínicos"},
+ {id:"patronSueno",t:"Patrón del sueño"},
+ {id:"alimentacion",t:"Alimentación"},
+ {id:"areaFamiliar",t:"Área familiar"},
+ {id:"areaSocialJuego",t:"Área social y juego"},
+ {id:"areaAcademica",t:"Área académica"},
+ {id:"emocionConducta",t:"Emoción y conducta"}
+];
+const CAMPOS=["pNombre","pDoc","pNac","pEdad","pEsc","pTel","pFecha","pAcomp","pCorreo"];
+let secciones={}; SECCIONES.forEach(s=>secciones[s.id]="");
+let rec=null, live=false, liveFlag=false, finalTxt="", t0=null, tInt=null;
+
+/* ════════ INIT ════════ */
+window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('pFecha').value=new Date().toLocaleDateString('es-CO');
+  restore(); initSR(); renderDoc(); checkDrive();
+  CAMPOS.forEach(id=>document.getElementById(id).addEventListener('input',persist));
+  document.getElementById('trans').addEventListener('input',e=>{finalTxt=e.target.value;persist();});
+});
+
+async function checkDrive(){
+  try{const r=await fetch('/api/guardar',{method:'GET'});const d=await r.json();
+    if(d.configured){document.getElementById('drivePill').classList.add('on');document.getElementById('drivePillTxt').textContent='Drive conectado';}
+    else{document.getElementById('drivePillTxt').textContent='Drive sin conectar';}
+  }catch(e){document.getElementById('drivePillTxt').textContent='Drive sin conectar';}
+}
+
+/* ════════ PERSISTENCIA LOCAL ════════ */
+function persist(){
+  const data={c:{},s:secciones,t:document.getElementById('trans').value};
+  CAMPOS.forEach(id=>data.c[id]=document.getElementById(id).value);
+  try{localStorage.setItem('anamnesis_draft',JSON.stringify(data));}catch(e){}
+}
+function restore(){
+  try{
+    const raw=localStorage.getItem('anamnesis_draft'); if(!raw)return;
+    const d=JSON.parse(raw);
+    CAMPOS.forEach(id=>{if(d.c&&d.c[id])document.getElementById(id).value=d.c[id];});
+    if(d.s)Object.keys(d.s).forEach(k=>{if(secciones.hasOwnProperty(k))secciones[k]=d.s[k];});
+    if(d.t){document.getElementById('trans').value=d.t;finalTxt=d.t;}
+  }catch(e){}
+}
+
+/* ════════ EDAD ════════ */
+function calcEdad(){
+  const v=document.getElementById('pNac').value;
+  const m=v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); if(!m)return;
+  const n=new Date(+m[3],+m[2]-1,+m[1]), hoy=new Date();
+  let e=hoy.getFullYear()-n.getFullYear();
+  if(hoy.getMonth()<n.getMonth()||(hoy.getMonth()===n.getMonth()&&hoy.getDate()<n.getDate()))e--;
+  if(e>=0&&e<120)document.getElementById('pEdad').value=e+' años';
+}
+
+/* ════════ SPEECH ════════ */
+function initSR(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('micAlert').classList.remove('hide');document.querySelector('.recorder').classList.add('hide');return;}
+  rec=new SR(); rec.lang='es-CO'; rec.continuous=true; rec.interimResults=true;
+  rec.onresult=e=>{
+    let fin='',inter='';
+    for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;e.results[i].isFinal?fin+=t+' ':inter+=t;}
+    if(fin){finalTxt+=fin;persist();}
+    document.getElementById('trans').value=finalTxt+inter;
+  };
+  rec.onerror=e=>{
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){document.getElementById('micAlert').classList.remove('hide');stopRec();}
+  };
+  rec.onend=()=>{if(liveFlag){try{rec.start();}catch(e){}}};
+}
+function toggleRec(){ if(!rec)return; live?stopRec():startRec(); }
+function startRec(){
+  liveFlag=true;live=true;t0=Date.now();
+  try{rec.start();}catch(e){}
+  document.getElementById('recBtn').classList.add('live');
+  document.getElementById('icMic').classList.add('hide');document.getElementById('icStop').classList.remove('hide');
+  tInt=setInterval(()=>{
+    const s=Math.floor((Date.now()-t0)/1000);
+    document.getElementById('recMeta').innerHTML=`<span class="timer">● ${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}</span> &nbsp;Grabando la entrevista...`;
+  },500);
+}
+function stopRec(){
+  liveFlag=false;live=false;try{rec.stop();}catch(e){}
+  clearInterval(tInt);
+  document.getElementById('recBtn').classList.remove('live');
+  document.getElementById('icMic').classList.remove('hide');document.getElementById('icStop').classList.add('hide');
+  document.getElementById('recMeta').textContent='Grabación pausada. Toca para continuar.';
+}
+
+/* ════════ IA ════════ */
+async function estructurar(){
+  const contenido=document.getElementById('trans').value.trim();
+  if(!contenido){toast('Primero graba o escribe la entrevista','err');return;}
+  if(live)stopRec();
+  const btn=document.getElementById('btnIA');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>&nbsp;Estructurando historia clínica...';
+  const prompt=`Eres asistente de una neuropsicóloga colombiana (Karen Pérez Pareja). A partir de la transcripción de una entrevista clínica (anamnesis) con un paciente o sus padres, redacta la historia clínica en tercera persona, estilo clínico profesional, conciso y objetivo, en español.
+
+Devuelve EXCLUSIVAMENTE un objeto JSON (sin markdown, sin backticks, sin texto adicional) con estas claves exactas: ${SECCIONES.map(s=>`"${s.id}"`).join(', ')}.
+
+Reglas:
+- Cada clave corresponde a: ${SECCIONES.map(s=>`${s.id} = ${s.t}`).join('; ')}.
+- Redacta en estilo de historia clínica neuropsicológica. Ejemplo: "Producto de segundo embarazo, parto en semana 37, presentó llanto espontáneo."
+- Si la transcripción no menciona nada sobre una sección, deja la clave con string vacío "".
+- No inventes datos que no estén en la transcripción.
+- Conserva cifras, edades y fechas exactamente como se mencionan.
+
+Transcripción:
+"""
+${contenido}
+"""`;
+  try{
+    const r=await fetch('/api/estructurar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error||'server');}
+    const data=await r.json();
+    const limpio=(data.texto||'').replace(/```json|```/g,'').trim();
+    const json=JSON.parse(limpio);
+    SECCIONES.forEach(s=>{const v=(json[s.id]||'').trim();if(v)secciones[s.id]=secciones[s.id]?secciones[s.id]+'\n'+v:v;});
+    persist();renderDoc();go('documento');
+    toast('Historia clínica estructurada ✓','ok');
+  }catch(e){
+    toast('No se pudo conectar con la IA. Intenta de nuevo.','err');
+  }finally{
+    btn.disabled=false;btn.innerHTML='✦&nbsp; Estructurar historia clínica con IA';
+  }
+}
+
+/* ════════ DOCUMENTO ════════ */
+function renderDoc(){
+  const hay=SECCIONES.some(s=>secciones[s.id].trim());
+  document.getElementById('docEmpty').classList.toggle('hide',hay);
+  document.getElementById('abar').classList.toggle('show',hay&&!document.getElementById('vDocumento').classList.contains('hide'));
+  document.getElementById('stepB').classList.toggle('done',hay);
+  const cont=document.getElementById('docSecs');cont.innerHTML='';
+  if(!hay)return;
+  SECCIONES.forEach(s=>{
+    const tiene=secciones[s.id].trim().length>0;
+    const div=document.createElement('div');div.className='card sec';
+    div.innerHTML=`<div class="sec-head"><span class="sec-title">${s.t}</span><span class="sec-badge ${tiene?'':'empty'}">${tiene?'✓':'vacío'}</span></div>
+      <textarea rows="${tiene?Math.max(2,Math.min(9,secciones[s.id].split('\n').length+1)):2}" placeholder="—"></textarea>`;
+    const ta=div.querySelector('textarea');ta.value=secciones[s.id];
+    ta.addEventListener('input',()=>{secciones[s.id]=ta.value;persist();});
+    cont.appendChild(div);
+  });
+}
+
+/* ════════ NAV ════════ */
+function go(v){
+  document.getElementById('vCaptura').classList.toggle('hide',v!=='captura');
+  document.getElementById('vDocumento').classList.toggle('hide',v!=='documento');
+  document.getElementById('stepA').classList.toggle('active',v==='captura');
+  document.getElementById('stepB').classList.toggle('active',v==='documento');
+  const hay=SECCIONES.some(s=>secciones[s.id].trim());
+  document.getElementById('abar').classList.toggle('show',v==='documento'&&hay);
+  window.scrollTo({top:0});
+}
+function togglePaciente(){document.getElementById('cardPaciente').classList.toggle('collapsed');}
+
+/* ════════ EXPORT ════════ */
+function buildDoc(){
+  const g=id=>document.getElementById(id).value.trim();
+  let d=`HISTORIA CLÍNICA NEUROPSICOLÓGICA\n\n`;
+  d+=`NOMBRE: ${g('pNombre')||'—'}\nN° DOCUMENTO: ${g('pDoc')||'—'}\nFECHA DE NACIMIENTO: ${g('pNac')||'—'}\nEDAD: ${g('pEdad')||'—'}\nESCOLARIDAD: ${g('pEsc')||'—'}\nCONTACTO: ${g('pTel')||'—'}\nCORREO: ${g('pCorreo')||'—'}\nACOMPAÑANTE: ${g('pAcomp')||'—'}\nFECHA DE EVALUACIÓN: ${g('pFecha')||'—'}\nPROFESIONAL EVALUADOR: NEUROPSICÓLOGA KAREN PÉREZ PAREJA\n\n`;
+  SECCIONES.forEach(s=>{if(secciones[s.id].trim())d+=`${s.t.toUpperCase()}\n${secciones[s.id].trim()}\n\n`;});
+  return d.trim();
+}
+async function copiarDoc(){
+  const txt=buildDoc();
+  try{await navigator.clipboard.writeText(txt);}catch{
+    const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  }
+  toast('Historia copiada — pégala en Word o Docs','ok');
+}
+async function guardarDrive(){
+  const nombre=document.getElementById('pNombre').value.trim();
+  if(!nombre){toast('Escribe el nombre del paciente antes de guardar','err');go('captura');return;}
+  const btn=document.getElementById('btnDrive');
+  const orig=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="spinner"></span>&nbsp;Guardando...';
+  try{
+    const payload={
+      nombre, fecha:document.getElementById('pFecha').value,
+      documento:document.getElementById('pDoc').value,
+      contenido:buildDoc()
+    };
+    const r=await fetch('/api/guardar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(!r.ok||!d.ok)throw new Error(d.error||'fail');
+    if(d.url){toast(`Guardado en Drive ✓ <a href="${d.url}" target="_blank">Abrir documento</a>`,'ok',6000);}
+    else{toast('Guardado en Drive ✓','ok');}
+  }catch(e){
+    toast('No se pudo guardar en Drive. Verifica la configuración.','err');
+  }finally{
+    btn.disabled=false;btn.innerHTML=orig;
+  }
+}
+
+/* ════════ TOAST ════════ */
+let toastT=null;
+function toast(msg,tipo='',dur=3000){
+  const t=document.getElementById('toast');
+  t.innerHTML=msg;t.className='toast show '+tipo;
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+/* ════════ NUEVA SESIÓN ════════ */
+function nuevaSesion(){
+  if(!confirm('¿Borrar toda la sesión actual? El contenido no guardado en Drive se perderá.'))return;
+  SECCIONES.forEach(s=>secciones[s.id]='');finalTxt='';
+  CAMPOS.forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pFecha').value=new Date().toLocaleDateString('es-CO');
+  document.getElementById('trans').value='';
+  if(live)stopRec();
+  try{localStorage.removeItem('anamnesis_draft');}catch(e){}
+  renderDoc();go('captura');
+  toast('Nueva sesión iniciada','ok');
+}
+</script>
+</body>
+</html>
