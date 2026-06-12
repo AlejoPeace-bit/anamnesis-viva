@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Anamnesis" />
+  <link rel="apple-touch-icon" href="/icon.png" />
+  <title>Anamnesis Viva</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, #FDF6F7 0%, #FAF0F2 100%);
+      min-height: 100dvh;
+      color: #4A3B40;
+    }
+    .container { max-width: 640px; margin: 0 auto; padding: 20px 16px 60px; }
+
+    /* Header */
+    .header { text-align: center; margin-bottom: 24px; }
+    .header h1 {
+      font-size: 28px; color: #B5697E;
+      font-family: 'Georgia', serif; font-weight: normal;
+      letter-spacing: 0.5px;
+    }
+    .header p { font-size: 11px; color: #C99AA6; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+
+    /* Card */
+    .card {
+      background: #FFFFFF; border: 1px solid #F2DDE2;
+      border-radius: 16px; padding: 16px; margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(181,105,126,0.06);
+    }
+    .card-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #B5697E; font-weight: 600; margin-bottom: 8px; display: block;
+    }
+
+    /* Datos paciente */
+    .datos-row { display: flex; gap: 10px; }
+    .datos-row input {
+      flex: 1; border: 1px solid #EBD3D9; border-radius: 10px;
+      padding: 10px 12px; font-size: 15px; color: #4A3B40;
+      background: #FDFAFB; outline: none;
+    }
+    .datos-row input:focus { border-color: #B5697E; }
+    .datos-row input.fecha { flex: 0 0 120px; text-align: center; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab {
+      flex: 1; padding: 10px; border-radius: 12px; font-size: 14px;
+      font-weight: 500; border: 1px solid #EBD3D9; cursor: pointer;
+      transition: all 0.2s; background: #FFFFFF; color: #B5697E;
+    }
+    .tab.active { background: #B5697E; color: #FFFFFF; border-color: #B5697E; }
+
+    /* Mic button */
+    .mic-wrap { text-align: center; margin: 8px 0 16px; }
+    .mic-btn {
+      width: 90px; height: 90px; border-radius: 50%; border: none;
+      background: #B5697E; color: white; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(181,105,126,0.35);
+      transition: transform 0.15s, background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mic-btn:active { transform: scale(0.93); }
+    .mic-btn.grabando { background: #D85A5A; box-shadow: 0 4px 20px rgba(216,90,90,0.4); }
+    .mic-btn svg { width: 36px; height: 36px; }
+    .mic-status {
+      margin-top: 8px; font-size: 13px; color: #D85A5A;
+      min-height: 20px; animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* Textarea */
+    textarea {
+      width: 100%; border: 1px solid #F2E4E8; border-radius: 10px;
+      padding: 12px; font-size: 15px; color: #4A3B40;
+      background: #FDFAFB; outline: none; resize: vertical;
+      line-height: 1.7; font-family: inherit;
+    }
+    textarea:focus { border-color: #C99AA6; }
+
+    /* Interim text */
+    .interim { color: #C99AA6; font-style: italic; }
+
+    /* Buttons */
+    .btn {
+      width: 100%; padding: 14px; border-radius: 14px; border: none;
+      font-size: 16px; font-weight: 500; cursor: pointer;
+      transition: opacity 0.2s, background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-primary { background: #B5697E; color: white; }
+    .btn-primary:disabled { background: #D4A5B1; }
+    .btn-success { background: #5E9E75; color: white; }
+    .btn-outline {
+      background: transparent; color: #B5697E;
+      border: 1px solid #EBD3D9; font-size: 13px; padding: 10px;
+    }
+
+    /* Sección documento */
+    .seccion { margin-bottom: 10px; }
+    .seccion-titulo {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #B5697E; font-weight: 600; margin-bottom: 6px;
+    }
+
+    /* Error */
+    .error { color: #C0392B; font-size: 13px; text-align: center; margin-top: 10px; }
+
+    /* Footer */
+    .footer { text-align: center; margin-top: 24px; }
+    .footer button { background: none; border: none; color: #C99AA6; font-size: 12px; text-decoration: underline; cursor: pointer; }
+    .footer p { color: #D4B5BD; font-size: 11px; margin-top: 8px; line-height: 1.5; }
+
+    /* Empty state */
+    .empty {
+      border: 1px dashed #EBD3D9; border-radius: 16px; padding: 32px;
+      text-align: center; color: #A98591; font-size: 14px; line-height: 1.6;
+    }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block; width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.4); border-top-color: white;
+      border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Alerta mic no disponible */
+    .alert {
+      background: #FFF6E8; border: 1px solid #F0DDB8; border-radius: 12px;
+      padding: 14px; font-size: 13px; color: #8A6A2F; line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>Anamnesis Viva</h1>
+    <p>Historia clínica asistida por IA</p>
+  </div>
+
+  <!-- Datos del paciente -->
+  <div class="card">
+    <span class="card-label">Paciente</span>
+    <div class="datos-row">
+      <input type="text" id="nombrePaciente" placeholder="Nombre completo" autocomplete="off" />
+      <input type="text" id="fechaEval" class="fecha" placeholder="Fecha" />
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('captura')">🎙 Entrevista</button>
+    <button class="tab" onclick="switchTab('documento')">📄 Documento</button>
+  </div>
+
+  <!-- CAPTURA -->
+  <div id="tab-captura">
+    <div class="mic-wrap" id="micWrap">
+      <button class="mic-btn" id="micBtn" onclick="toggleGrabar()" aria-label="Grabar">
+        <svg id="iconMic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="9" y="3" width="6" height="11" rx="3"/>
+          <path d="M5 11a7 7 0 0 0 14 0"/>
+          <line x1="12" y1="18" x2="12" y2="21"/>
+        </svg>
+        <svg id="iconStop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none">
+          <rect x="7" y="7" width="10" height="10" rx="2"/>
+        </svg>
+      </button>
+      <div class="mic-status" id="micStatus"></div>
+    </div>
+
+    <div id="alertaMic" class="alert" style="display:none;margin-bottom:12px;">
+      ⚠️ El navegador no tiene acceso al micrófono. En iPhone, abre esta app en <strong>Safari</strong> y acepta el permiso de micrófono cuando aparezca.
+    </div>
+
+    <div class="card">
+      <span class="card-label">Transcripción de la entrevista</span>
+      <textarea id="transcripcion" rows="9"
+        placeholder="Aquí aparece lo que se habla en la sesión. También puedes escribir o pegar notas directamente."></textarea>
+    </div>
+
+    <button class="btn btn-primary" id="btnEstructurar" onclick="estructurar()">
+      ✦ Estructurar con IA
+    </button>
+    <div id="errorMsg" class="error"></div>
+  </div>
+
+  <!-- DOCUMENTO -->
+  <div id="tab-documento" style="display:none">
+    <div id="docVacio" class="empty">
+      El documento está vacío.<br/>
+      Graba la entrevista y presiona <strong>«Estructurar con IA»</strong>.
+    </div>
+    <div id="docSecciones"></div>
+    <button class="btn btn-primary" id="btnCopiar" onclick="copiarDoc()" style="display:none;margin-top:4px;">
+      Copiar historia clínica completa
+    </button>
+  </div>
+
+  <div class="footer">
+    <button onclick="nuevaSesion()">Nueva sesión (borrar todo)</button>
+    <p>Borrador asistido por IA · La historia clínica final es revisada y validada por la profesional</p>
+  </div>
+
+</div>
+
+<script>
+const SECCIONES = [
+  { id: "motivoConsulta",       titulo: "Motivo de la consulta" },
+  { id: "neurodesarrollo",      titulo: "Neurodesarrollo" },
+  { id: "desarrolloMotor",      titulo: "Desarrollo motor" },
+  { id: "desarrolloLenguaje",   titulo: "Desarrollo del lenguaje" },
+  { id: "esfinteresSensorial",  titulo: "Control de esfínteres y sensorialidad" },
+  { id: "antecedentesClinicos", titulo: "Antecedentes clínicos" },
+  { id: "patronSueno",          titulo: "Patrón del sueño" },
+  { id: "alimentacion",         titulo: "Alimentación" },
+  { id: "areaFamiliar",         titulo: "Área familiar" },
+  { id: "areaSocialJuego",      titulo: "Área social y juego" },
+  { id: "areaAcademica",        titulo: "Área académica" },
+  { id: "emocionConducta",      titulo: "Emoción y conducta" },
+];
+
+let secciones = {};
+SECCIONES.forEach(s => secciones[s.id] = "");
+
+let rec = null;
+let grabando = false;
+let grabandoFlag = false;
+let transcripcionFinal = "";
+
+// ── Inicialización ──────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('fechaEval').value = new Date().toLocaleDateString('es-CO');
+  initRecognition();
+  renderDoc();
+});
+
+function initRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { document.getElementById('alertaMic').style.display = 'block'; document.getElementById('micWrap').style.display = 'none'; return; }
+  rec = new SR();
+  rec.lang = 'es-CO';
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.onresult = (e) => {
+    let fin = '', interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) fin += t + ' ';
+      else interim += t;
+    }
+    if (fin) transcripcionFinal += fin;
+    const ta = document.getElementById('transcripcion');
+    ta.value = transcripcionFinal + (interim ? interim : '');
+  };
+  rec.onerror = (e) => {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      document.getElementById('alertaMic').style.display = 'block';
+      document.getElementById('micWrap').style.display = 'none';
+    }
+    grabandoFlag = false; grabando = false; actualizarMic();
+  };
+  rec.onend = () => { if (grabandoFlag) { try { rec.start(); } catch(e){} } };
+}
+
+function toggleGrabar() {
+  if (!rec) return;
+  if (grabando) {
+    grabandoFlag = false; grabando = false;
+    try { rec.stop(); } catch(e){}
+  } else {
+    grabandoFlag = true; grabando = true;
+    try { rec.start(); } catch(e){}
+  }
+  actualizarMic();
+}
+
+function actualizarMic() {
+  const btn = document.getElementById('micBtn');
+  const st = document.getElementById('micStatus');
+  const iconMic = document.getElementById('iconMic');
+  const iconStop = document.getElementById('iconStop');
+  if (grabando) {
+    btn.classList.add('grabando');
+    st.textContent = '● Escuchando la entrevista...';
+    iconMic.style.display = 'none'; iconStop.style.display = '';
+  } else {
+    btn.classList.remove('grabando');
+    st.textContent = '';
+    iconMic.style.display = ''; iconStop.style.display = 'none';
+  }
+}
+
+// ── Tabs ──────────────────────────────────────────────────────
+function switchTab(t) {
+  document.getElementById('tab-captura').style.display = t === 'captura' ? '' : 'none';
+  document.getElementById('tab-documento').style.display = t === 'documento' ? '' : 'none';
+  document.querySelectorAll('.tab').forEach((el, i) => {
+    el.classList.toggle('active', (i === 0 && t === 'captura') || (i === 1 && t === 'documento'));
+  });
+}
+
+// ── Estructurar con IA ────────────────────────────────────────
+async function estructurar() {
+  const texto = (transcripcionFinal + ' ' + document.getElementById('transcripcion').value).trim();
+  // usar lo que está en el textarea (puede ser editado manualmente)
+  const contenido = document.getElementById('transcripcion').value.trim();
+  if (!contenido) { document.getElementById('errorMsg').textContent = 'No hay contenido para estructurar.'; return; }
+
+  document.getElementById('errorMsg').textContent = '';
+  const btn = document.getElementById('btnEstructurar');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Estructurando historia clínica...';
+
+  const prompt = `Eres asistente de una neuropsicóloga colombiana (Karen Pérez Pareja). A partir de la transcripción de una entrevista clínica (anamnesis) con un paciente o sus padres, redacta la historia clínica en tercera persona, estilo clínico profesional, conciso y objetivo, en español.
+
+Devuelve EXCLUSIVAMENTE un objeto JSON (sin markdown, sin backticks, sin texto adicional) con estas claves exactas: ${SECCIONES.map(s=>`"${s.id}"`).join(', ')}.
+
+Reglas:
+- Cada clave corresponde a: ${SECCIONES.map(s=>`${s.id} = ${s.titulo}`).join('; ')}.
+- Redacta en estilo de historia clínica neuropsicológica. Ejemplo: "Producto de segundo embarazo, parto en semana 37, presentó llanto espontáneo."
+- Si la transcripción no menciona nada sobre una sección, deja la clave con string vacío "".
+- No inventes datos que no estén en la transcripción.
+- Conserva cifras, edades y fechas exactamente como se mencionan.
+
+Transcripción:
+"""
+${contenido}
+"""`;
+
+  try {
+    const r = await fetch('/api/estructurar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    if (!r.ok) throw new Error('Error del servidor');
+    const data = await r.json();
+    const limpio = (data.texto || '').replace(/```json|```/g,'').trim();
+    const json = JSON.parse(limpio);
+    SECCIONES.forEach(s => {
+      const v = (json[s.id] || '').trim();
+      if (v) secciones[s.id] = secciones[s.id] ? secciones[s.id] + '\n' + v : v;
+    });
+    renderDoc();
+    switchTab('documento');
+  } catch(e) {
+    document.getElementById('errorMsg').textContent = 'No se pudo conectar. Revisa tu conexión e intenta de nuevo.';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✦ Estructurar con IA';
+  }
+}
+
+// ── Render documento ──────────────────────────────────────────
+function renderDoc() {
+  const hay = SECCIONES.some(s => secciones[s.id].trim());
+  document.getElementById('docVacio').style.display = hay ? 'none' : '';
+  document.getElementById('btnCopiar').style.display = hay ? '' : 'none';
+  const cont = document.getElementById('docSecciones');
+  cont.innerHTML = '';
+  if (!hay) return;
+  SECCIONES.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'card seccion';
+    div.innerHTML = `<span class="seccion-titulo">${s.titulo}</span>
+      <textarea rows="${Math.max(2, Math.min(8, (secciones[s.id].match(/\n/g)||[]).length + 2))}"
+        oninput="secciones['${s.id}']=this.value">${secciones[s.id]}</textarea>`;
+    cont.appendChild(div);
+  });
+}
+
+// ── Copiar ────────────────────────────────────────────────────
+async function copiarDoc() {
+  const nombre = document.getElementById('nombrePaciente').value || '—';
+  const fecha = document.getElementById('fechaEval').value;
+  let doc = `HISTORIA CLÍNICA NEUROPSICOLÓGICA\n\nNOMBRE: ${nombre}\nFECHA DE EVALUACIÓN: ${fecha}\nPROFESIONAL: NEUROPSICÓLOGA KAREN PÉREZ PAREJA\n\n`;
+  SECCIONES.forEach(s => { if (secciones[s.id].trim()) doc += `${s.titulo.toUpperCase()}\n${secciones[s.id].trim()}\n\n`; });
+  try {
+    await navigator.clipboard.writeText(doc.trim());
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = doc.trim(); document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  }
+  const btn = document.getElementById('btnCopiar');
+  btn.textContent = '✓ Copiado — pégalo en Word o Docs';
+  btn.classList.remove('btn-primary'); btn.classList.add('btn-success');
+  setTimeout(() => { btn.textContent = 'Copiar historia clínica completa'; btn.classList.add('btn-primary'); btn.classList.remove('btn-success'); }, 2500);
+}
+
+// ── Nueva sesión ──────────────────────────────────────────────
+function nuevaSesion() {
+  if (!confirm('¿Borrar toda la sesión actual?')) return;
+  SECCIONES.forEach(s => secciones[s.id] = '');
+  transcripcionFinal = '';
+  document.getElementById('transcripcion').value = '';
+  document.getElementById('nombrePaciente').value = '';
+  document.getElementById('errorMsg').textContent = '';
+  if (grabando) toggleGrabar();
+  renderDoc();
+  switchTab('captura');
+}
+</script>
+</body>
+</html>
